@@ -5,12 +5,14 @@ from aiogram.dispatcher.fsm.storage.memory import MemoryStorage
 from soccer_bot.config import load_config
 from soccer_bot.handlers.start import start_router
 from soccer_bot.services import broadcaster
+from soccer_bot.services.default_commands import set_default_commands
 
 logger = logging.getLogger(__name__)
 
 
 async def on_startup(bot: Bot, admin_ids: list[int]):
     await broadcaster.broadcast(bot, admin_ids, "Бот был запущен!")
+    await set_default_commands(bot)
 
 
 def register_global_middlewares(dp: Dispatcher, config, session_pool):
