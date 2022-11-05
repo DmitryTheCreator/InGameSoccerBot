@@ -3,7 +3,8 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.dispatcher.fsm.storage.memory import MemoryStorage
 from soccer_bot.config import load_config
-from soccer_bot.handlers.start import start_router
+from soccer_bot.handlers import common, inline_menu
+from soccer_bot.infrastructure.database.functions.connect_to_database import create_db
 from soccer_bot.services import broadcaster
 from soccer_bot.services.default_commands import set_default_commands
 
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 async def on_startup(bot: Bot, admin_ids: list[int]):
     await broadcaster.broadcast(bot, admin_ids, "Бот был запущен!")
     await set_default_commands(bot)
+    await create_db()
 
 
 def register_global_middlewares(dp: Dispatcher, config, session_pool):
@@ -30,8 +32,8 @@ async def main():
     dp = Dispatcher(storage=storage)
     dp['config'] = config
 
-    for router in [start_router]:
-        dp.include_router(router)
+    dp.include_router(common.router)
+    dp.include_router(inline_menu.router)
 
     await on_startup(bot, config.tg_bot.admin_ids)
     await dp.start_polling(bot)

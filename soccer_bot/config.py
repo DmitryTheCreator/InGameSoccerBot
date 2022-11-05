@@ -15,6 +15,7 @@ class DbConfig:
     password: str
     user: str
     database: str
+    uri: str
 
 
 @dataclass
@@ -33,16 +34,22 @@ def load_config(path: str = None):
     env = Env()
     env.read_env(path)
 
+    host = env('DB_HOST')
+    password = env.str('DB_PASS')
+    user = env.str('DB_USER')
+    database = env.str('DB_NAME')
+
     return Config(
         tg_bot=TgBot(
             token=env.str('BOT_TOKEN'),
             admin_ids=list(map(int, env.list('ADMINS')))
         ),
         db=DbConfig(
-            host=env.str('DB_HOST'),
-            password=env.str('DB_PASS'),
-            user=env.str('DB_USER'),
-            database=env.str('DB_NAME')
+            host=host,
+            password=password,
+            user=user,
+            database=database,
+            uri=f"postgresql://{user}:{password}@{host}/{database}"
         ),
         misc=Miscellaneous()
     )
